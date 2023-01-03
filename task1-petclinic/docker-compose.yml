@@ -1,0 +1,51 @@
+version: "3.9" 
+
+services:
+  mysql:
+    build: 
+      context: ./mysql
+      dockerfile: Dockerfile
+    environment:
+    - MYSQL_ROOT_PASSWORD=petclinic
+    - MYSQL_ALLOW_EMPTY_PASSWORD=true
+    - MYSQL_USER=petclinic
+    - MYSQL_PASSWORD=petclinic
+    - MYSQL_DATABASE=petclinic
+    volumes:
+    - db_data:/var/lib/mysql:rw
+
+  petclinic:
+    depends_on:
+    - mysql
+    build: 
+      context: ./petclinic
+      dockerfile: Dockerfile
+
+  jenkins:
+    build:
+      context: ./jenkins
+      dockerfile: Dockerfile
+    volumes:
+      - jenkis_data:/root/.jenkins
+
+  nginx:
+    depends_on:
+    - jenkins
+    - petclinic
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+    - "8080:8080"
+    - "8081:8081"
+
+  alpine:
+    build: 
+      context: alpine
+      dockerfile: Dockerfile
+    ports:
+    - "666:8080"
+
+volumes:
+  db_data: {}
+  jenkis_data: {}
